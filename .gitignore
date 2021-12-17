@@ -33,6 +33,5 @@ build/
 .vscode/
 
 .mvn
-src/test
 mvnw
 mvnw.cmd
