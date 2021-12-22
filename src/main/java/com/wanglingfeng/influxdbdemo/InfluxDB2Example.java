@@ -2,7 +2,9 @@ package com.wanglingfeng.influxdbdemo;
 
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.influxdb.annotations.Column;
 import com.influxdb.annotations.Measurement;
@@ -32,6 +34,14 @@ public class InfluxDB2Example {
                 .addField("used_percent", 22.43234543)
                 .time(Instant.now(), WritePrecision.NS);
         writeApi.writePoint(bucket, org, point);
+        ArrayList<Point> points = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            points.add(Point.measurement("mem")
+                    .addTag("host", "host1")
+                    .addField("used_percent", new Random().nextDouble()*10)
+                    .time(System.currentTimeMillis()+(i*1000), WritePrecision.MS));
+        }
+        writeApi.writePoints(bucket, org,points);
         //Use POJO and corresponding class to write data
         Mem mem = new Mem();
         mem.setHost("host1");
