@@ -28,33 +28,34 @@ public class InfluxDB2Example {
         WriteApiBlocking writeApi = client.getWriteApiBlocking();
         writeApi.writeRecord(bucket, org, WritePrecision.NS, data);
         //Use a Data Point to write data
-        Point point = Point
-                .measurement("mem")
-                .addTag("host", "host1")
-                .addField("used_percent", 22.43234543)
-                .time(Instant.now(), WritePrecision.NS);
-        writeApi.writePoint(bucket, org, point);
+//        Point point = Point
+//                .measurement("test_influxdb2")
+//                .addTag("host", "host1")
+//                .addField("used_percent", 22.43234543)
+//                .time(Instant.now(), WritePrecision.NS);
+//        writeApi.writePoint(bucket, org, point);
         ArrayList<Point> points = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
-            points.add(Point.measurement("mem")
+            points.add(Point.measurement("test_influxdb2")
                     .addTag("host", "host1")
                     .addField("used_percent", new Random().nextDouble()*10)
                     .time(System.currentTimeMillis()+(i*1000), WritePrecision.MS));
         }
         writeApi.writePoints(bucket, org,points);
         //Use POJO and corresponding class to write data
-        Mem mem = new Mem();
-        mem.setHost("host1");
-        mem.setUsed_percent(25.43234543);
-        mem.setTime(Instant.now());
-        writeApi.writeMeasurement(bucket, org, WritePrecision.NS, mem);
+//        Mem mem = new Mem();
+//        mem.setHost("host1");
+//        mem.setUsed_percent(25.43234543);
+//        mem.setTime(Instant.now());
+//        writeApi.writeMeasurement(bucket, org, WritePrecision.NS, mem);
         //Execute a Flux query
-        String query = "from(bucket: \"test-bucket\") |> range(start: -1h)";
+        String query = "from(bucket: \"test-bucket\") |> range(start: -1h)" +
+                "|> filter(fn: (r) => r._measurement == \"test_influxdb2\" )";
         List<FluxTable> tables = client.getQueryApi().query(query, org);
         for (FluxTable table : tables) {
-            System.out.println(table.toString());
+            table.getColumns().forEach(c-> System.out.println(c.getLabel()));
             for (FluxRecord record : table.getRecords()) {
-                System.out.println(record);
+                System.out.println(record.getField()+"-->"+record.getValue());
             }
         }
         //Dispose the Client
